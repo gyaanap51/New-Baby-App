@@ -1,61 +1,61 @@
-video = "";
-objects=[];
+object = [];
 status = "";
-function preload(){
-video = createVideo('video.mp4');
-video.hide();
+song = "";
+
+function preload() {
+    song = loadSound("ring_ring.mp3");
 }
-function setup(){
-    canvas = createCanvas(640, 480);
+
+function setup() {
+    canvas = createCanvas(400, 380);
     canvas.center();
+    video = createCapture(VIDEO);
+    video.size(380, 380);
+    video.hide();
+    objectDetector = ml5.objectDetector('cocossd', modelLoded);
+    document.getElementById("status").innerHTML = "Status : Detecting objects";
 }
-function draw(){
-    image(video, 0, 0, 640, 480);
-    if(status !="")
-    {
+
+function modelLoded() {
+    status = true;
+    console.log("Model_Loded");
+}
+
+function draw() {
+    image(video, 0, 0, 400, 380);
+    if (status != "") {
+        r = random(255);
+        g = random(255);
+        b = random(255);
         objectDetector.detect(video, gotResult);
-        for (i = 0; i< objects.length; i++) {
-            document.getElementById("status").innerHTML = "Status : Objects detected";
-            document.getElementById("number_of_objects").innerHTML = "Number of objects detected are :"+ objects.length;
-
-          r=random(255);
-          g=random(255);
-          b=random(255);
-
-
-
-        fill(r, g, b);
-        percent = floor(objects[i].confidence * 100);
-        text(objects[i].label + " "+ percent + "%", objects[i].x + 15, objects[i].y + 15);
-        noFill();
-        stroke(r, g, b);
-        rect(objects[i].x, objects[i].y, objects[i].width, objects[i].height);
+        for (i = 0; i < object.length; i++) {
+            document.getElementById("status").innerHTML = "Status : Object detected";
+            fill(r, g, b);
+            percent = Math.floor(object[i].confidence * 100);
+            text(object[i].label + " " + percent + "%", object[i].x + 15, object[i].y + 15);
+            noFill();
+            stroke('#FF0000');
+            rect(object[i].x, object[i].y, object[i].width, object[i].height);
+            document.getElementById("check").innerHTML = "Baby found";
+            song.stop();
         }
+    } else {
+        document.getElementById("check").innerHTML = "Baby not found";
+        song.play();
     }
 }
 
-
-function gotResult(error, results){
-    if(error){
+function gotResult(error, results) {
+    if (error) {
         console.log(error);
+    } else {
+        console.log(results);
+        object = results;
     }
-    console.log(results);
-    objects = results;
-
 }
-
-function start()
+function play()
 {
-    objectDetector = ml5.objectDetector('cocossd', modelLoaded);
-    document.getElementById("status").innerHTML = "Status : Detecting Objects";
+	song.play();
+	song.setVolume(5);
+	song.rate(1);
 }
-
-function modelLoaded()
-    {
- console.log("Model Loaded!");
- status = true;
- video.loop();
- video.speed(1);
- video.volume(0);
-
-    }
